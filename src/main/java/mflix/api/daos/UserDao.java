@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
+import static com.mongodb.client.model.Updates.set;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -161,10 +162,17 @@ public class UserDao extends AbstractMFlixDao {
    * @return User object that just been updated.
    */
   public boolean updateUserPreferences(String email, Map<String, ?> userPreferences) {
+    //DONE
     //TODO> Ticket: User Preferences - implement the method that allows for user preferences to
     // be updated.
+    if(userPreferences == null) throw new IncorrectDaoOperation("Preferences cannot be null");
+    Bson queryFilter = new Document("email", email);
+    User user = usersCollection.find(queryFilter).iterator().tryNext();
+    usersCollection.updateOne(queryFilter, set("preferences", userPreferences));
+
+
     //TODO > Ticket: Handling Errors - make this method more robust by
     // handling potential exceptions when updating an entry.
-    return false;
+    return true;
   }
 }
