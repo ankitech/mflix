@@ -64,10 +64,12 @@ public class MovieDao extends AbstractMFlixDao {
     List<Bson> pipeline = new ArrayList<>();
     // match stage to find movie
     Bson match = Aggregates.match(Filters.eq("_id", new ObjectId(movieId)));
+    Bson lookup = Aggregates.lookup("comments", "_id", "movie_id", "comments");
     pipeline.add(match);
-    //DONE
-    // TODO> Ticket: Get Comments - implement the lookup stage that allows the comments to
-    // retrieved with Movies.
+      //DONE
+      // TODO> Ticket: Get Comments - implement the lookup stage that allows the comments to
+      // retrieved with Movies
+    pipeline.add(lookup);
     Document movie = moviesCollection.aggregate(pipeline).first();
 
     return movie;

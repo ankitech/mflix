@@ -1,22 +1,14 @@
 package mflix.api.daos;
 
 import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoWriteException;
-import com.mongodb.ReadConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Sorts;
-import com.mongodb.client.model.Updates;
-import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import mflix.api.models.Comment;
 import mflix.api.models.Critic;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import static com.mongodb.client.model.Updates.set;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -79,12 +70,14 @@ public class CommentDao extends AbstractMFlixDao {
    * returns the resulting Comment object.
    */
   public Comment addComment(Comment comment) {
-
+    //DONE
     // TODO> Ticket - Update User reviews: implement the functionality that enables adding a new
     // comment.
+    if(comment.getId() == null) throw new IncorrectDaoOperation("Id cannot be null for the comment");
+    commentCollection.insertOne(comment);
     // TODO> Ticket - Handling Errors: Implement a try catch block to
     // handle a potential write exception when given a wrong commentId.
-    return null;
+    return comment;
   }
 
   /**
@@ -102,11 +95,21 @@ public class CommentDao extends AbstractMFlixDao {
    */
   public boolean updateComment(String commentId, String text, String email) {
 
+    //DONE
     // TODO> Ticket - Update User reviews: implement the functionality that enables updating an
     // user own comments
+    Document queryFilter = new Document("_id", new ObjectId(commentId));
+    queryFilter.append("email",email);
+
+    UpdateResult result = commentCollection.updateOne(queryFilter, set("text", text));
+    if(result.getModifiedCount() == 0)
+    {
+      return false;
+    }
+
     // TODO> Ticket - Handling Errors: Implement a try catch block to
     // handle a potential write exception when given a wrong commentId.
-    return false;
+    return true;
   }
 
   /**
