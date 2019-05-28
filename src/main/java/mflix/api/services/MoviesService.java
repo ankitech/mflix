@@ -262,8 +262,12 @@ public class MoviesService {
       }
     }
 
-    Movie movie = MovieDocumentMapper.mapToMovie(movieDao.getMovie(updateComment.getMovieId()));
-    results.put("comments", movie.getComments());
+    //Movie movie = MovieDocumentMapper.mapToMovie(movieDao.getMovie(updateComment.getMovieId()));
+    //results.put("comments", movie.getComments());
+    List<Comment> comments =  new ArrayList<>();
+    comments.add(updateComment);
+    results.put("comments", comments);
+
     return true;
   }
 
@@ -299,8 +303,11 @@ public class MoviesService {
       return false;
     }
 
-    Movie movie = MovieDocumentMapper.mapToMovie(movieDao.getMovie(movieId));
-    results.put("comments", movie.getComments());
+    //Movie movie = MovieDocumentMapper.mapToMovie(movieDao.getMovie(movieId));
+    //results.put("comments", movie.getComments());
+    List<Comment> comments =  new ArrayList<>();
+    comments.add(newComment);
+    results.put("comments", comments);
     return true;
   }
 
@@ -323,8 +330,12 @@ public class MoviesService {
       return false;
     }
 
-    Movie movie = MovieDocumentMapper.mapToMovie(movieDao.getMovie(movieId));
-    results.put("comments", movie.getComments());
+    //Movie movie = MovieDocumentMapper.mapToMovie(movieDao.getMovie(movieId));
+    //results.put("comments", movie.getComments());
+    List<Comment> comments =  new ArrayList<>();
+    comments.add(new Comment());
+    results.put("comments", comments);
+
     return true;
   }
 
