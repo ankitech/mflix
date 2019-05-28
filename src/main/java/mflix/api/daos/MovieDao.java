@@ -64,10 +64,9 @@ public class MovieDao extends AbstractMFlixDao {
     List<Bson> pipeline = new ArrayList<>();
     // match stage to find movie
     Bson match = Aggregates.match(Filters.eq("_id", new ObjectId(movieId)));
+    Bson lookup = Aggregates.lookup("comments", "_id", "movie_id", "comments");
     pipeline.add(match);
-    //DONE
-    // TODO> Ticket: Get Comments - implement the lookup stage that allows the comments to
-    // retrieved with Movies.
+    pipeline.add(lookup);
     Document movie = moviesCollection.aggregate(pipeline).first();
 
     return movie;
@@ -119,8 +118,6 @@ public class MovieDao extends AbstractMFlixDao {
    * @return List of matching Document objects.
    */
   public List<Document> getMoviesByCountry(String... country) {
-    //DONE
-    //TODO> Ticket: Projection - implement the query and projection required by the unit test
     Bson queryFilter =  new Document("countries", new Document("$in", Arrays.asList(country)));
     Bson projection = new Document("title", 1);
     List<Document> movies = new ArrayList<>();
@@ -166,9 +163,6 @@ public class MovieDao extends AbstractMFlixDao {
   public List<Document> getMoviesByCast(String sortKey, int limit, int skip, String... cast) {
     Bson castFilter = new Document("cast", new Document("$in", Arrays.asList(cast)));
     Bson sort = Sorts.descending(sortKey);
-    //DONE
-    //TODO> Ticket: Subfield Text Search - implement the expected cast
-    // filter and sort
     List<Document> movies = new ArrayList<>();
     moviesCollection
         .find(castFilter)
@@ -195,9 +189,6 @@ public class MovieDao extends AbstractMFlixDao {
     // sort key
     Bson sort = Sorts.descending(sortKey);
     List<Document> movies = new ArrayList<>();
-    //DONE
-    // TODO > Ticket: Paging - implement the necessary cursor methods to support simple
-    // pagination like skip and limit in the code below
 
     moviesCollection.find(castFilter).sort(sort).skip(skip).limit(limit).iterator()
     .forEachRemaining(movies::add);
@@ -275,11 +266,6 @@ public class MovieDao extends AbstractMFlixDao {
     Bson facetStage = buildFacetStage();
     // Using a LinkedList to ensure insertion order
     List<Bson> pipeline = new LinkedList<>();
-    //DONE
-    // TODO > Ticket: Faceted Search - build the aggregation pipeline by adding all stages in the
-    // correct order
-    // Your job is to order the stages correctly in the pipeline.
-    // Starting with the `matchStage` add the remaining stages.
     pipeline.add(matchStage);
     pipeline.add(sortStage);
     pipeline.add(skipStage);
