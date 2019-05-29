@@ -1,18 +1,14 @@
 package mflix.api.daos;
 
 import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoException;
-import com.mongodb.ReadConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import mflix.api.models.Comment;
 import mflix.api.models.Critic;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.mongodb.client.model.Aggregates.limit;
-import static com.mongodb.client.model.Aggregates.sortByCount;
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.set;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -78,18 +70,13 @@ public class CommentDao extends AbstractMFlixDao {
    * returns the resulting Comment object.
    */
   public Comment addComment(Comment comment) {
-
-    if(!Optional.ofNullable(comment.getId()).isPresent()) {
-      throw new IncorrectDaoOperation("Comment id cannot be null");
-    }
-
-    try {
-      commentCollection.insertOne(comment);
-    } catch (MongoException e) {
-      log.error("An error ocurred while trying to insert a Comment.");
-      return null;
-    }
-
+    //DONE
+    // TODO> Ticket - Update User reviews: implement the functionality that enables adding a new
+    // comment.
+    if(comment.getId() == null) throw new IncorrectDaoOperation("Id cannot be null for the comment");
+    commentCollection.insertOne(comment);
+    // TODO> Ticket - Handling Errors: Implement a try catch block to
+    // handle a potential write exception when given a wrong commentId.
     return comment;
   }
 
@@ -108,22 +95,21 @@ public class CommentDao extends AbstractMFlixDao {
    */
   public boolean updateComment(String commentId, String text, String email) {
 
-    UpdateResult ur = null;
+    //DONE
+    // TODO> Ticket - Update User reviews: implement the functionality that enables updating an
+    // user own comments
+    Document queryFilter = new Document("_id", new ObjectId(commentId));
+    queryFilter.append("email",email);
 
-    try {
-      ur = commentCollection.updateOne(
-              and(
-                      eq("_id", new ObjectId(commentId)),
-                      eq("email", email)),
-              combine(
-                      set("text", text),
-                      set("date", new Date())));
-    } catch (MongoException e) {
-      log.error("An error ocurred while trying to update a Comment.");
+    UpdateResult result = commentCollection.updateOne(queryFilter, set("text", text));
+    if(result.getModifiedCount() == 0)
+    {
       return false;
     }
 
-    return ur.getMatchedCount() > 0 && ur.getModifiedCount() > 0;
+    // TODO> Ticket - Handling Errors: Implement a try catch block to
+    // handle a potential write exception when given a wrong commentId.
+    return true;
   }
 
   /**
@@ -134,23 +120,12 @@ public class CommentDao extends AbstractMFlixDao {
    * @return true if successful deletes the comment.
    */
   public boolean deleteComment(String commentId, String email) {
-      if(!Optional.ofNullable(commentId).isPresent()) {
-          throw new IllegalArgumentException("Commend id cannot be null");
-      }
-
-      DeleteResult dr = null;
-
-      try {
-          dr = commentCollection
-                  .deleteOne(
-                          and(
-                                  eq("_id", new ObjectId(commentId)),
-                                  eq("email", email)));
-      } catch (MongoException e) {
-          log.error("An error ocurred while trying to delete a Comment.");
-          return false;
-      }
-      return dr.getDeletedCount() > 0;
+    // TODO> Ticket Delete Comments - Implement the method that enables the deletion of a user
+    // comment
+    // TIP: make sure to match only users that own the given commentId
+    // TODO> Ticket Handling Errors - Implement a try catch block to
+    // handle a potential write exception when given a wrong commentId.
+    return false;
   }
 
   /**
@@ -162,17 +137,12 @@ public class CommentDao extends AbstractMFlixDao {
    */
   public List<Critic> mostActiveCommenters() {
     List<Critic> mostActive = new ArrayList<>();
-
-    List<Bson> pipeline = Arrays.asList(
-            sortByCount("$email"),
-            limit(20));
-
-    commentCollection
-            .withReadConcern(ReadConcern.MAJORITY)
-            .aggregate(pipeline, Critic.class)
-            .iterator()
-            .forEachRemaining(mostActive::add);
-
+    // // TODO> Ticket: User Report - execute a command that returns the
+    // // list of 20 users, group by number of comments. Don't forget,
+    // // this report is expected to be produced with an high durability
+    // // guarantee for the returned documents. Once a commenter is in the
+    // // top 20 of users, they become a Critic, so mostActive is composed of
+    // // Critic objects.
     return mostActive;
   }
 }
